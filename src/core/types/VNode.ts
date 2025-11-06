@@ -1,26 +1,26 @@
 import type { ComponentChild } from "./Component"
 import type { TypedEventListener } from "./Web"
 
-export interface VNode<PROPS extends object = object> {
+export interface IVNode<PROPS extends object = object> {
    readonly tag: VNodeTag
-   readonly status: VNodeLifecycleStatus
-   attrs?: VNodeAttrs
-   element?: VNodeElement
-   children?: VNodeChildren<PROPS>
-   parentVNode?: VNodeParentVNode
+   readonly attrs?: VNodeAttrs
+   readonly children?: VNodeChildren<PROPS>
 
-   onUpdate(callback: VoidFunction): void
-   onMounted(callback: VoidFunction): void
-   onUnmounted(callback: VoidFunction): void
-   setStatus(status: VNodeLifecycleStatus): void
+   element?: VNodeElement
+   parentVNode?: VNodeParentVNode
 }
 
+export type IVNodeConstructorProps<T extends object> = Pick<
+   IVNode<T>,
+   "tag" | "attrs" | "children"
+>
+
 export type VNodeTag = string
-export type VNodeParentVNode = VNode
+export type VNodeParentVNode = IVNode
 export type VNodeElement<T extends HTMLElement = HTMLElement> = T
 export type VNodeChildren<T extends object = object> = (
    | ComponentChild<T>
-   | VNode<T>
+   | IVNode<T>
    | string
 )[]
 
@@ -32,11 +32,3 @@ export type VNodeAttrValue =
    | null
    | undefined
    | TypedEventListener
-
-export enum VNodeLifecycleStatus {
-   UNMOUNTED,
-   MOUNTING,
-   MOUNTED,
-   UPDATE,
-   UNMOUNTING
-}

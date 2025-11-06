@@ -1,13 +1,13 @@
-import type { VNode } from "./VNode"
+import type { IVNode } from "./VNode"
 
 export interface IVdom {
-   readonly root: VNode
+   readonly root: IVNode
 
-   mount(vnode: VNode, container: Element): void
-   update(vnode: VNode): void
-   unmount(vnode: VNode): void
+   mount(vnode: IVNode, container: Element): void
+   update(vnode: IVNode): void
+   unmount(vnode: IVNode): void
 }
 
 export interface IVdomConstructorProps {
-   vnode: VNode
+   vnode: IVNode
 }
