@@ -1,7 +1,7 @@
 import type { ComponentChild } from "./Component"
 import type { TypedEventListener } from "./Web"
 
-export interface IVNode<PROPS extends object = object> {
+export interface VNode<PROPS extends object = object> {
    readonly tag: VNodeTag
    status: VNodeLifecycle
    attrs?: VNodeAttrs
@@ -11,7 +11,7 @@ export interface IVNode<PROPS extends object = object> {
 }
 
 export type VNodeTag = string
-export type VNodeParentVNode = IVNode
+export type VNodeParentVNode = VNode
 export type VNodeElement<T extends HTMLElement = HTMLElement> = T
 export type VNodeChildren<T extends object = object> = (ComponentChild<T> | string)[]
 

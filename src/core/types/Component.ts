@@ -1,11 +1,11 @@
-import type { IVNode } from "./VNode"
+import type { VNode } from "./VNode"
 
-export interface IComponent<T extends object = object> {
+export interface Component<T extends object = object> {
    readonly displayName: string
-   render(props: T): IVNode
+   render(props: T): VNode
 }
 
 export interface ComponentChild<T extends object = object> {
-   instance: IComponent<T>
+   instance: Component<T>
    props: T
 }
