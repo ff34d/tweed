@@ -1,5 +1,5 @@
-import type { Component } from "./Component"
+import type { IComponent } from "./Component"
 
 export interface ITweed {
-   mount(component: Component, container: Element): void
+   mount(component: IComponent, container: Element): void
 }
