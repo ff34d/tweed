@@ -1,6 +1,5 @@
-import type { VNode } from "./VNode"
-
 export interface IRender {
-   mount(vnode: VNode, container: Element): void
+   mount(el: Element, container: Element): void
+   update(el: Element): void
    unmount(el: Element): void
 }
