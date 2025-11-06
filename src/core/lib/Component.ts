@@ -1,5 +1,6 @@
 import {
    ComponentStatus,
+   type ComponentStatusHandlers,
    type ComponentSubscriber,
    type ComponentUnsubscribe,
    type IComponent,
@@ -9,13 +10,12 @@ import {
 
 export class Component<PROPS extends object = object> implements IComponent<PROPS> {
    readonly #displayName: string
+   readonly #statusHandlers: ComponentStatusHandlers
    readonly #constructorRender: IComponent<PROPS>["render"]
 
    #status: ComponentStatus
-
    #beforeMountSubscribers?: Set<ComponentSubscriber>
    #mountedSubscribers?: Set<ComponentSubscriber>
-
    #beforeUnmountSubscribers?: Set<ComponentSubscriber>
    #unmountedSubscribers?: Set<ComponentSubscriber>
 
@@ -23,6 +23,13 @@ export class Component<PROPS extends object = object> implements IComponent<PROP
       this.#status = ComponentStatus.UNMOUNTED
       this.#displayName = props.displayName
       this.#constructorRender = props.render
+
+      this.#statusHandlers = new Map([
+         [ComponentStatus.MOUNTING, () => this.#beforeMountSubscribers],
+         [ComponentStatus.MOUNTED, () => this.#mountedSubscribers],
+         [ComponentStatus.UNMOUNTING, () => this.#beforeUnmountSubscribers],
+         [ComponentStatus.UNMOUNTED, () => this.#unmountedSubscribers]
+      ])
    }
 
    // ==============================
@@ -47,25 +54,8 @@ export class Component<PROPS extends object = object> implements IComponent<PROP
 
    setStatus(value: ComponentStatus): void {
       this.#status = value
-
-      switch (value) {
-         case ComponentStatus.MOUNTING: {
-            this.#invokeSubscribers(this.#beforeMountSubscribers)
-            break
-         }
-         case ComponentStatus.MOUNTED: {
-            this.#invokeSubscribers(this.#mountedSubscribers)
-            break
-         }
-         case ComponentStatus.UNMOUNTING: {
-            this.#invokeSubscribers(this.#beforeUnmountSubscribers)
-            break
-         }
-         case ComponentStatus.UNMOUNTED: {
-            this.#invokeSubscribers(this.#unmountedSubscribers)
-            break
-         }
-      }
+      const subscribers = this.#statusHandlers.get(value)?.()
+      if (subscribers) this.#invokeSubscribers(subscribers)
    }
 
    #invokeSubscribers(list?: Set<ComponentSubscriber>): void {

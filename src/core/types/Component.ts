@@ -33,3 +33,8 @@ export enum ComponentStatus {
    UNMOUNTING,
    UNMOUNTED
 }
+
+export type ComponentStatusHandlers = Map<
+   ComponentStatus,
+   () => Set<ComponentSubscriber> | undefined
+>
