@@ -1,5 +1,9 @@
 export type Signal<T> = IReactivity<T>
 
+export interface IReactivityConstructorProps<T> {
+   initValue: T
+}
+
 export interface IReactivity<T> {
    get: ReactivityGetter<T>
    set: ReactivitySetter<T>
@@ -8,7 +12,7 @@ export interface IReactivity<T> {
 
 export type ReactivityGetter<T> = () => T
 export type ReactivitySetter<T> = (setter: T | ReactivitySetterCallback<T>) => void
-export type ReactivitySetterCallback<T> = (prev: T) => void
+export type ReactivitySetterCallback<T> = (prev: T) => T
 
 export type ReactivitySubscribe<T> = (
    subscriber: ReactivitySubscriber<T>
