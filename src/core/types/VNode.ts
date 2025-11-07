@@ -10,6 +10,11 @@ export interface IVNode<PROPS extends object = object> {
    parentVNode?: VNodeParentVNode
 }
 
+export type IVNodeConstructorProps<T extends object = object> = Pick<
+   IVNode<T>,
+   "tag" | "attrs" | "children"
+>
+
 export type VNodeTag = string
 export type VNodeParentVNode = IVNode
 export type VNodeElement<T extends HTMLElement = HTMLElement> = T

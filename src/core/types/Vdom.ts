@@ -1,13 +1,12 @@
-import type { IVNode } from "./VNode"
+import type { IComponent } from "./Component"
+import type { IRender } from "./Render"
 
 export interface IVdom {
-   readonly root: IVNode
-
-   mount(vnode: IVNode, container: Element): void
-   update(vnode: IVNode): void
-   unmount(vnode: IVNode): void
+   mount(component: IComponent, container: Element, props?: object): void
+   update(component: IComponent): void
+   unmount(component: IComponent): void
 }
 
 export interface IVdomConstructorProps {
-   vnode: IVNode
+   render: IRender
 }

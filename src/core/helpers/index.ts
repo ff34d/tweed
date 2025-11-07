@@ -1,2 +1,3 @@
-export * from "./createComponent"
-export * from "./h"
+export * from "./isComponent"
+export * from "./isComponentChild"
+export * from "./isVNode"
