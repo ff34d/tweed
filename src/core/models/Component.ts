@@ -18,6 +18,7 @@ export class Component<PROPS extends object = object> implements IComponent<PROP
    #mountedSubscribers?: Set<ComponentSubscriber>
    #beforeUnmountSubscribers?: Set<ComponentSubscriber>
    #unmountedSubscribers?: Set<ComponentSubscriber>
+   #updateSubscribers?: Set<ComponentSubscriber>
 
    constructor(props: IComponentConstructorProps<PROPS>) {
       this.#status = ComponentStatus.UNMOUNTED
@@ -28,7 +29,8 @@ export class Component<PROPS extends object = object> implements IComponent<PROP
          [ComponentStatus.MOUNTING, () => this.#beforeMountSubscribers],
          [ComponentStatus.MOUNTED, () => this.#mountedSubscribers],
          [ComponentStatus.UNMOUNTING, () => this.#beforeUnmountSubscribers],
-         [ComponentStatus.UNMOUNTED, () => this.#unmountedSubscribers]
+         [ComponentStatus.UNMOUNTED, () => this.#unmountedSubscribers],
+         [ComponentStatus.UPDATE, () => this.#updateSubscribers]
       ])
    }
 
@@ -91,6 +93,12 @@ export class Component<PROPS extends object = object> implements IComponent<PROP
    onUnmounted(sub: ComponentSubscriber): ComponentUnsubscribe {
       if (!this.#unmountedSubscribers) this.#unmountedSubscribers = new Set()
       this.#unmountedSubscribers.add(sub)
+      return () => this.#unmountedSubscribers?.delete(sub)
+   }
+
+   onUpdate(sub: ComponentSubscriber): ComponentUnsubscribe {
+      if (!this.#updateSubscribers) this.#updateSubscribers = new Set()
+      this.#updateSubscribers.add(sub)
       return () => this.#unmountedSubscribers?.delete(sub)
    }
 }

@@ -22,6 +22,8 @@ export interface IComponent<T extends object = object> {
 
    onBeforeUnmount(sub: ComponentSubscriber): ComponentUnsubscribe
    onUnmounted(sub: ComponentSubscriber): ComponentUnsubscribe
+
+   onUpdate(sub: ComponentSubscriber): ComponentUnsubscribe
 }
 
 export type ComponentSubscriber = VoidFunction
@@ -31,7 +33,8 @@ export enum ComponentStatus {
    MOUNTING,
    MOUNTED,
    UNMOUNTING,
-   UNMOUNTED
+   UNMOUNTED,
+   UPDATE
 }
 
 export type ComponentStatusHandlers = Map<

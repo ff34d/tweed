@@ -75,6 +75,10 @@ export class Vdom implements IVdom {
 
          if (isComponentChild(child)) {
             child.instance.setStatus(ComponentStatus.MOUNTING)
+
+            const unsubscribe = child.instance.onUpdate(() => this.update(child.instance))
+            child.instance.onUnmounted(unsubscribe)
+
             el.append(this.#createElement(child.instance, child.props))
             child.instance.setStatus(ComponentStatus.MOUNTED)
             continue
