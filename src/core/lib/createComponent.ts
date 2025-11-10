@@ -1,4 +1,4 @@
-import { Component } from "../lib"
+import { Component } from "../models"
 import type { IComponentConstructorProps } from "../types"
 
 export function createComponent<PROPS extends object = object>(

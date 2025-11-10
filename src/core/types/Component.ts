@@ -13,9 +13,10 @@ export type IComponentConstructorProps<T extends object> = Pick<
 export interface IComponent<T extends object = object> {
    readonly displayName: string
    readonly status: ComponentStatus
+   rootElement?: Element
 
    render(props: T): IVNode<T>
-   setStatus(value: ComponentStatus): void
+   setStatus(value: ComponentStatus, config?: { skipNotify?: boolean }): void
 
    onBeforeMount(sub: ComponentSubscriber): ComponentUnsubscribe
    onMounted(sub: ComponentSubscriber): ComponentUnsubscribe

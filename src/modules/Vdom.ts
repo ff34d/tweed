@@ -2,6 +2,7 @@ import {
    ComponentStatus,
    isComponent,
    isComponentChild,
+   isSignal,
    isVNode,
    type IComponent,
    type IRender,
@@ -29,7 +30,20 @@ export class Vdom implements IVdom {
 
    #createElement(target: IComponent | IVNode, props?: object): Element {
       if (isComponent(target)) {
-         return this.#createElement(target.render(props || {}))
+         const r = () => this.#createElement(target.render(props || {}))
+
+         if (!target?.rootElement) {
+            target.onUpdate(() => {
+               const newEl = r()
+               target.rootElement?.replaceWith(newEl)
+               target.rootElement = newEl
+               target.setStatus(ComponentStatus.MOUNTED, { skipNotify: true })
+            })
+         }
+
+         const el = r()
+         target.rootElement = el
+         return el
       }
 
       const el = document.createElement(target.tag)
@@ -49,7 +63,7 @@ export class Vdom implements IVdom {
          const loweredKey = key.toLowerCase()
 
          if (loweredKey.startsWith("on") && typeof value === "function") {
-            el.addEventListener(loweredKey.slice(1), value as EventListener)
+            el.addEventListener(loweredKey.slice(2), value as EventListener)
             continue
          }
 
@@ -73,12 +87,13 @@ export class Vdom implements IVdom {
             continue
          }
 
+         if (isSignal(child)) {
+            el.append(document.createTextNode(child.get()))
+            continue
+         }
+
          if (isComponentChild(child)) {
             child.instance.setStatus(ComponentStatus.MOUNTING)
-
-            const unsubscribe = child.instance.onUpdate(() => this.update(child.instance))
-            child.instance.onUnmounted(unsubscribe)
-
             el.append(this.#createElement(child.instance, child.props))
             child.instance.setStatus(ComponentStatus.MOUNTED)
             continue
@@ -90,7 +105,7 @@ export class Vdom implements IVdom {
       void component
    }
 
-   update(component: IComponent): void {
-      void component
+   update(newVNode: IVNode, oldVNode: IVNode): void {
+      oldVNode.element?.replaceChild(oldVNode.element, this.#createElement(newVNode))
    }
 }

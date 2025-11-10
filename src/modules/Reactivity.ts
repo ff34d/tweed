@@ -56,6 +56,6 @@ export class Reactivity<T> implements IReactivity<T> {
 // Hooks
 // ==============================
 
-export function useSignal<T>(props: IReactivityConstructorProps<T>): Signal<T> {
-   return new Reactivity<T>(props)
+export function useSignal<T>(init: T): Signal<T> {
+   return new Reactivity<T>({ initValue: init })
 }

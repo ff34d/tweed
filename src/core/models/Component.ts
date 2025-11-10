@@ -20,6 +20,8 @@ export class Component<PROPS extends object = object> implements IComponent<PROP
    #unmountedSubscribers?: Set<ComponentSubscriber>
    #updateSubscribers?: Set<ComponentSubscriber>
 
+   rootElement?: Element
+
    constructor(props: IComponentConstructorProps<PROPS>) {
       this.#status = ComponentStatus.UNMOUNTED
       this.#displayName = props.displayName
@@ -54,8 +56,11 @@ export class Component<PROPS extends object = object> implements IComponent<PROP
       return this.#constructorRender(props)
    }
 
-   setStatus(value: ComponentStatus): void {
+   setStatus(value: ComponentStatus, config?: { skipNotify?: boolean }): void {
       this.#status = value
+      console.log(this.#displayName, ComponentStatus[value])
+      if (config?.skipNotify) return
+
       const subscribers = this.#statusHandlers.get(value)?.()
       if (subscribers) this.#invokeSubscribers(subscribers)
    }

@@ -1,4 +1,5 @@
 import type { ComponentChild } from "./Component"
+import type { Signal } from "./Reactivity"
 import type { TypedEventListener } from "./Web"
 
 export interface IVNode<PROPS extends object = object> {
@@ -21,6 +22,7 @@ export type VNodeElement<T extends HTMLElement = HTMLElement> = T
 export type VNodeChildren<T extends object = object> = (
    | ComponentChild<T>
    | IVNode<T>
+   | Signal<any>
    | string
 )[]
 
