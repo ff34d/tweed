@@ -1,6 +1,5 @@
 import {
    ComponentStatus,
-   isComponent,
    isComponentChild,
    isSignal,
    isVNode,
@@ -8,7 +7,9 @@ import {
    type IRender,
    type IVdom,
    type IVdomConstructorProps,
-   type IVNode
+   type IVNode,
+   type VNodeAttrValue,
+   type VNodeChild
 } from "../core"
 
 export class Vdom implements IVdom {
@@ -18,39 +19,33 @@ export class Vdom implements IVdom {
       this.#render = props.render
    }
 
-   // ==============================
-   // Mounting
-   // ==============================
-
-   mount(component: IComponent, container: Element, props?: object): void {
+   public mount(component: IComponent, container: Element, props?: object): void {
       component.setStatus(ComponentStatus.MOUNTING)
-      this.#render.mount(this.#createElement(component, props), container)
+
+      const rootEl = this.#componentToElement(component, props)
+      this.#render.mount(rootEl, container)
+
       component.setStatus(ComponentStatus.MOUNTED)
    }
 
-   #createElement(target: IComponent | IVNode, props?: object): Element {
-      if (isComponent(target)) {
-         const r = () => this.#createElement(target.render(props || {}))
+   #componentToElement(component: IComponent, props?: object): Element {
+      const vnode = component.render(props || {})
+      const el = this.#vnodeToElement(vnode)
 
-         if (!target?.rootElement) {
-            target.onUpdate(() => {
-               const newEl = r()
-               target.rootElement?.replaceWith(newEl)
-               target.rootElement = newEl
-               target.setStatus(ComponentStatus.MOUNTED, { skipNotify: true })
-            })
-         }
+      if (component?.rootElement) return el
 
-         const el = r()
-         target.rootElement = el
-         return el
-      }
+      component.onUpdate(() => this.update(component, props))
+      component.rootElement = el
 
-      const el = document.createElement(target.tag)
-      target.element = el
+      return el
+   }
 
-      this.#applyAttributes(target, el)
-      this.#applyChildren(target, el)
+   #vnodeToElement(vnode: IVNode): Element {
+      const el = document.createElement(vnode.tag)
+      vnode.element = el
+
+      this.#applyAttributes(vnode, el)
+      this.#applyChildren(vnode, el)
 
       return el
    }
@@ -60,15 +55,19 @@ export class Vdom implements IVdom {
       if (!attrs) return
 
       for (const [key, value] of Object.entries(attrs)) {
-         const loweredKey = key.toLowerCase()
-
-         if (loweredKey.startsWith("on") && typeof value === "function") {
-            el.addEventListener(loweredKey.slice(2), value as EventListener)
-            continue
-         }
-
-         el.setAttribute(loweredKey, String(value))
+         this.#setAttribute(key, value, el)
       }
+   }
+
+   #setAttribute(key: string, value: VNodeAttrValue, el: Element): void {
+      const loweredKey = key.toLowerCase()
+
+      if (loweredKey.startsWith("on") && typeof value === "function") {
+         el.addEventListener(loweredKey.slice(2), value as EventListener)
+         return
+      }
+
+      el.setAttribute(loweredKey, String(value))
    }
 
    #applyChildren(vnode: IVNode, el: Element): void {
@@ -76,36 +75,48 @@ export class Vdom implements IVdom {
       if (!children) return
 
       for (const child of children) {
-         if (typeof child === "string") {
-            el.append(document.createTextNode(child))
-            continue
-         }
-
-         if (isVNode(child)) {
-            const childElement = this.#createElement(child)
-            el.append(childElement)
-            continue
-         }
-
-         if (isSignal(child)) {
-            el.append(document.createTextNode(child.get()))
-            continue
-         }
-
-         if (isComponentChild(child)) {
-            child.instance.setStatus(ComponentStatus.MOUNTING)
-            el.append(this.#createElement(child.instance, child.props))
-            child.instance.setStatus(ComponentStatus.MOUNTED)
-            continue
-         }
+         this.#appendChild(child, el)
       }
    }
 
-   unmount(component: IComponent): void {
-      void component
+   #appendChild(child: VNodeChild, el: Element): void {
+      if (typeof child === "string") {
+         el.append(document.createTextNode(child))
+         return
+      }
+
+      if (isVNode(child)) {
+         const childElement = this.#vnodeToElement(child)
+         el.append(childElement)
+         return
+      }
+
+      if (isSignal(child)) {
+         el.append(document.createTextNode(child.get()))
+         return
+      }
+
+      if (isComponentChild(child)) {
+         child.instance.setStatus(ComponentStatus.MOUNTING)
+
+         const childEl = this.#componentToElement(child.instance, child.props)
+         el.append(childEl)
+
+         child.instance.setStatus(ComponentStatus.MOUNTED)
+         return
+      }
    }
 
-   update(newVNode: IVNode, oldVNode: IVNode): void {
-      oldVNode.element?.replaceChild(oldVNode.element, this.#createElement(newVNode))
+   public update(component: IComponent, props?: object): void {
+      const el = this.#componentToElement(component, props)
+
+      component.rootElement?.replaceWith(el)
+      component.rootElement = el
+
+      component.setStatus(ComponentStatus.MOUNTED, { skipNotify: true })
+   }
+
+   public unmount(component: IComponent): void {
+      void component
    }
 }

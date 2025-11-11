@@ -19,12 +19,14 @@ export type IVNodeConstructorProps<T extends object = object> = Pick<
 export type VNodeTag = string
 export type VNodeParentVNode = IVNode
 export type VNodeElement<T extends HTMLElement = HTMLElement> = T
-export type VNodeChildren<T extends object = object> = (
+
+export type VNodeChildren<T extends object = object> = VNodeChild<T>[]
+
+export type VNodeChild<T extends object = object> =
    | ComponentChild<T>
    | IVNode<T>
    | Signal<any>
    | string
-)[]
 
 export type VNodeAttrs = Record<string, VNodeAttrValue>
 export type VNodeAttrValue =

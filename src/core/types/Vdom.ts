@@ -1,10 +1,9 @@
 import type { IComponent } from "./Component"
 import type { IRender } from "./Render"
-import type { IVNode } from "./VNode"
 
 export interface IVdom {
    mount(component: IComponent, container: Element, props?: object): void
-   update(newVNode: IVNode, oldVNode: IVNode): void
+   update(component: IComponent, props?: object): void
    unmount(component: IComponent): void
 }
 
