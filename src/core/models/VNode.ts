@@ -12,8 +12,8 @@ export class VNode<PROPS extends object = object> implements IVNode<PROPS> {
    readonly attrs?: VNodeAttrs
    readonly children?: VNodeChildren<PROPS>
 
-   parentVNode?: VNodeParentVNode
-   element?: HTMLElement
+   public parentVNode?: VNodeParentVNode
+   public element?: HTMLElement
 
    constructor(props: IVNodeConstructorProps<PROPS>) {
       this.tag = props.tag

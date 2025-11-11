@@ -20,7 +20,7 @@ export class Component<PROPS extends object = object> implements IComponent<PROP
    #unmountedSubscribers?: Set<ComponentSubscriber>
    #updateSubscribers?: Set<ComponentSubscriber>
 
-   rootElement?: Element
+   public rootElement?: Element
 
    constructor(props: IComponentConstructorProps<PROPS>) {
       this.#status = ComponentStatus.UNMOUNTED
@@ -58,7 +58,6 @@ export class Component<PROPS extends object = object> implements IComponent<PROP
 
    setStatus(value: ComponentStatus, config?: { skipNotify?: boolean }): void {
       this.#status = value
-      console.log(this.#displayName, ComponentStatus[value])
       if (config?.skipNotify) return
 
       const subscribers = this.#statusHandlers.get(value)?.()
@@ -104,6 +103,6 @@ export class Component<PROPS extends object = object> implements IComponent<PROP
    onUpdate(sub: ComponentSubscriber): ComponentUnsubscribe {
       if (!this.#updateSubscribers) this.#updateSubscribers = new Set()
       this.#updateSubscribers.add(sub)
-      return () => this.#unmountedSubscribers?.delete(sub)
+      return () => this.#updateSubscribers?.delete(sub)
    }
 }
